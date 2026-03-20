@@ -21,11 +21,11 @@ class Relives(object):
 
 class ReliveItem(object):
     def __init__(self, json):
-        self.index_url = json['index_url']
-        self.project = json['project']
+        self.index_url = json["index_url"]
+        self.project = json["project"]
 
     def get_url(self):
-        return urlparse(self.index_url, 'https').geturl()
+        return urlparse(self.index_url, "https").geturl()
 
 
 class ReliveRecordings(object):
@@ -33,19 +33,19 @@ class ReliveRecordings(object):
         self.recordings = [ReliveRecording(el) for el in json]
 
     def unreleased(self):
-        return list(filter(lambda rec: rec.mp4 != '', self.recordings))
+        return list(filter(lambda rec: rec.mp4 != "", self.recordings))
 
 
 class ReliveRecording(object):
     def __init__(self, json):
-        self.duration = maybe_json(json, 'duration', 0)
-        self.mp4 = maybe_json(json, 'mp4', '')
-        self.thumbnail = maybe_json(json, 'thumbnail', '')
-        self.room = maybe_json(json, 'room', '')
-        self.title = json['title']
+        self.duration = maybe_json(json, "duration", 0)
+        self.mp4 = maybe_json(json, "mp4", "")
+        self.thumbnail = maybe_json(json, "thumbnail", "")
+        self.room = maybe_json(json, "room", "")
+        self.title = json["title"]
 
     def get_video_url(self):
-        return urlparse(self.mp4, 'https').geturl()
+        return urlparse(self.mp4, "https").geturl()
 
     def get_thumb_url(self):
-        return urlparse(self.thumbnail, 'https').geturl()
+        return urlparse(self.thumbnail, "https").geturl()

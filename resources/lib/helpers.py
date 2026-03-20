@@ -6,7 +6,7 @@ def user_preference_sorter(prefer_quality, prefer_format, prefer_dash=False):
     def do_sort(obj):
         prio = 0
 
-        if obj.type == 'dash':
+        if obj.type == "dash":
             prio += 50 if prefer_dash else -50
 
         if obj.format == prefer_format:
@@ -37,6 +37,7 @@ def user_preference_sorter(prefer_quality, prefer_format, prefer_dash=False):
             pass
 
         return -prio
+
     return do_sort
 
 
@@ -52,18 +53,18 @@ def json_date_to_info(json, field, info):
         return
 
     try:
-        y, m, d = [int(x) for x in json[field][0:10].split('-')]
-        info['date'] = "%02d.%02d.%04d" % (d, m, y)
-        info['year'] = y
-        info['aired'] = "%04d-%02d-%02d" % (y, m, d)
-        info['dateadded'] = "%04d-%02d-%02d" % (y, m, d)
+        y, m, d = [int(x) for x in json[field][0:10].split("-")]
+        info["date"] = "%02d.%02d.%04d" % (d, m, y)
+        info["year"] = y
+        info["aired"] = "%04d-%02d-%02d" % (y, m, d)
+        info["dateadded"] = "%04d-%02d-%02d" % (y, m, d)
     except ValueError:
         return
 
 
 def calc_aspect(s):
     try:
-        aspect = [float(x) for x in s.split(':')]
+        aspect = [float(x) for x in s.split(":")]
         if len(aspect) == 2:
             return aspect[0] / aspect[1]
     except ValueError:

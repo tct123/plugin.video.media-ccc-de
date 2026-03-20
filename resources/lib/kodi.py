@@ -10,8 +10,8 @@ except ImportError:
 
 
 def major_version():
-    verstr = xbmc.getInfoLabel('System.BuildVersion')
-    match = re.match(r'(\d+)\.', verstr)
+    verstr = xbmc.getInfoLabel("System.BuildVersion")
+    match = re.match(r"(\d+)\.", verstr)
     if match:
         return int(match.group(1))
     return None

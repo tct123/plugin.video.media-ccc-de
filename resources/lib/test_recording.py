@@ -12,8 +12,8 @@ def test_recordings():
     assert len(recordings) == 6
     preferred = recordings[0]
     assert preferred.hd is True
-    assert preferred.format == 'mp4'
-    assert preferred.folder == 'h264-hd'
+    assert preferred.format == "mp4"
+    assert preferred.folder == "h264-hd"
     assert len(preferred.languages) == 2
 
 
@@ -24,10 +24,10 @@ def test_minimal_broken_json():
     assert len(recordings) == 2
     preferred = recordings[0]
     assert preferred.hd is True
-    assert preferred.format == 'mp4'
+    assert preferred.format == "mp4"
     assert len(preferred.languages) == 1
 
 
 # From https://api.media.ccc.de/public/events/2893
-SampleJson = getfile('recording_full.json')
-MinimalBrokenJson = getfile('recording_minimal.json')
+SampleJson = getfile("recording_full.json")
+MinimalBrokenJson = getfile("recording_minimal.json")

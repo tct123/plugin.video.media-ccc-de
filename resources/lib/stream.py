@@ -16,15 +16,14 @@ class Conference(object):
     def __init__(self, json):
         self.rooms = []
         # Ignore groups for now
-        for group in json['groups']:
-            self.rooms += [Room(elem, group['group'])
-                           for elem in group['rooms']]
+        for group in json["groups"]:
+            self.rooms += [Room(elem, group["group"]) for elem in group["rooms"]]
         self.slug = json["slug"]
         self.name = json["conference"]
 
 
 class Room(object):
-    def __init__(self, json, group=''):
+    def __init__(self, json, group=""):
         self.streams = []
         for stream in json["streams"]:
             if len(stream["urls"]) > 0:
@@ -35,29 +34,36 @@ class Room(object):
         if len(group) > 0:
             self.display = group + ": " + self.display
 
-        self.current_talk_title = maybe_json(maybe_json(maybe_json(json, 'talks', {}), 'current', {}), 'title', '')
+        self.current_talk_title = maybe_json(
+            maybe_json(maybe_json(json, "talks", {}), "current", {}), "title", ""
+        )
 
     def streams_sorted(self, quality, format, dash=False, video=True):
-        log('Requested quality %s and format %s' % (quality, format))
-        typematch = ('video', 'dash') if video else ('audio', )
-        want = sorted(filter(lambda stream: stream.type in typematch,
-                             self.streams),
-                      key=user_preference_sorter(quality, format, dash))
+        log("Requested quality %s and format %s" % (quality, format))
+        typematch = ("video", "dash") if video else ("audio",)
+        want = sorted(
+            filter(lambda stream: stream.type in typematch, self.streams),
+            key=user_preference_sorter(quality, format, dash),
+        )
         return want
 
 
 class Stream(object):
     def __init__(self, name, data, stream):
         self.format = name
-        if self.format == 'hls':
-            self.format = 'mp4'
+        if self.format == "hls":
+            self.format = "mp4"
         self.hd = None
-        if stream['videoSize'] is not None:
-            self.hd = stream['videoSize'][0] >= 1280
-        self.url = data['url']
-        self.translated = stream['isTranslated']
-        self.type = stream['type']
+        if stream["videoSize"] is not None:
+            self.hd = stream["videoSize"][0] >= 1280
+        self.url = data["url"]
+        self.translated = stream["isTranslated"]
+        self.type = stream["type"]
 
     def __repr__(self):
-        return '<Stream: %s, hd: %s, type: %s, trans: %s>' % (
-            self.format, self.hd, self.type, self.translated)
+        return "<Stream: %s, hd: %s, type: %s, trans: %s>" % (
+            self.format,
+            self.hd,
+            self.type,
+            self.translated,
+        )

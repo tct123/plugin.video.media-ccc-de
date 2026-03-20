@@ -7,10 +7,12 @@ from .stream import Streams
 from .testdata import getfile
 
 
-DATA = list((quality, format, quality == 'hd', dash)
-    for quality in ('hd', 'sd')
-    for format in ('mp4', 'webm')
-    for dash in (True, False))
+DATA = list(
+    (quality, format, quality == "hd", dash)
+    for quality in ("hd", "sd")
+    for format in ("mp4", "webm")
+    for dash in (True, False)
+)
 
 
 def test_conferences():
@@ -27,10 +29,10 @@ def test_rooms():
     c = s.conferences[0]
     assert len(c.rooms) == 3
     assert c.rooms[0].slug == "vortragssaal"
-    assert c.rooms[0].display == u"Für die Glupscher: Vortragssaal"
+    assert c.rooms[0].display == "Für die Glupscher: Vortragssaal"
 
 
-@pytest.mark.parametrize('quality,format,hd,dash', DATA)
+@pytest.mark.parametrize("quality,format,hd,dash", DATA)
 def test_streams(quality, format, hd, dash):
     s = Streams(SampleJson)
     c = s.conferences[0]
@@ -39,13 +41,13 @@ def test_streams(quality, format, hd, dash):
     streams = r.streams_sorted(quality, format, dash)
     assert len(streams) == 4
     preferred = streams[0]
-    assert preferred.type == 'video'
+    assert preferred.type == "video"
     assert preferred.hd is hd
     assert preferred.format == format
     assert preferred.translated is False
 
 
-@pytest.mark.parametrize('quality,format,hd,prefer_dash', DATA)
+@pytest.mark.parametrize("quality,format,hd,prefer_dash", DATA)
 def test_streams_multiple_translations(quality, format, hd, prefer_dash):
     s = Streams(SampleJson)
     c = s.conferences[1]
@@ -77,13 +79,13 @@ def test_streams_multiple_translations(quality, format, hd, prefer_dash):
     assert trans2.format == format
     assert trans2.translated is True
 
-    assert dash.type == 'dash'
+    assert dash.type == "dash"
     assert dash.hd is None
-    assert dash.format == 'dash'
+    assert dash.format == "dash"
     assert dash.translated is False
 
 
-@pytest.mark.parametrize('quality,format,hd,dash', DATA)
+@pytest.mark.parametrize("quality,format,hd,dash", DATA)
 def test_dash_only(quality, format, hd, dash):
     s = Streams(SampleJson)
     c = s.conferences[2]
@@ -92,10 +94,10 @@ def test_dash_only(quality, format, hd, dash):
     streams = r.streams_sorted(quality, format, dash)
     assert len(streams) == 1
     preferred = streams[0]
-    assert preferred.type == 'dash'
+    assert preferred.type == "dash"
     assert preferred.hd is None
-    assert preferred.format == 'dash'
+    assert preferred.format == "dash"
     assert preferred.translated is False
 
 
-SampleJson = getfile('stream_v2.json')
+SampleJson = getfile("stream_v2.json")

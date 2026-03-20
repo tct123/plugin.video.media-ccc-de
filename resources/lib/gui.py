@@ -5,7 +5,8 @@ try:
     import xbmcgui
 except ImportError:
     import warnings
-    warnings.warn('Not running under Kodi, GUI will not work!')
+
+    warnings.warn("Not running under Kodi, GUI will not work!")
     xbmcgui = None
 
 
@@ -31,4 +32,4 @@ def info(text):
 
 
 def msg(text, level, time=15):
-    xbmcgui.Dialog().notification('media.ccc.de', text, level, time * 1000)
+    xbmcgui.Dialog().notification("media.ccc.de", text, level, time * 1000)

@@ -11,18 +11,18 @@ FORMATS = ["mp4", "webm"]
 def get_setting_int(plugin, name):
     val = getSetting(plugin.handle, name)
     if not val:
-        val = '0'
+        val = "0"
     return int(val)
 
 
 def get_quality(plugin):
-    return QUALITY[get_setting_int(plugin, 'quality')]
+    return QUALITY[get_setting_int(plugin, "quality")]
 
 
 def get_format(plugin):
-    return FORMATS[get_setting_int(plugin, 'format')]
+    return FORMATS[get_setting_int(plugin, "format")]
 
 
 def prefer_dash(plugin):
-    val = getSetting(plugin.handle, 'dash')
-    return val == 'true'
+    val = getSetting(plugin.handle, "dash")
+    return val == "true"

@@ -7,8 +7,13 @@ import sys
 import routing
 import xbmcplugin
 from xbmcgui import ListItem
-from xbmcplugin import (addDirectoryItem, addSortMethod, endOfDirectory,
-    setResolvedUrl, setContent)
+from xbmcplugin import (
+    addDirectoryItem,
+    addSortMethod,
+    endOfDirectory,
+    setResolvedUrl,
+    setContent,
+)
 
 from resources.lib import http, kodi, settings
 from resources.lib.helpers import maybe_json, calc_aspect, json_date_to_info
@@ -16,47 +21,51 @@ from resources.lib.helpers import maybe_json, calc_aspect, json_date_to_info
 plugin = routing.Plugin()
 
 
-@plugin.route('/')
-@plugin.route('/dir/<path:subdir>')
-def show_dir(subdir=''):
+@plugin.route("/")
+@plugin.route("/dir/<path:subdir>")
+def show_dir(subdir=""):
     try:
         data = get_index_data()
     except http.FetchError:
         return
 
     subdirs = set()
-    if subdir == '':
+    if subdir == "":
         depth = 0
 
-        addDirectoryItem(plugin.handle, plugin.url_for(show_live),
-                         ListItem('Live Streaming'), True)
+        addDirectoryItem(
+            plugin.handle, plugin.url_for(show_live), ListItem("Live Streaming"), True
+        )
     else:
-        depth = len(subdir.split('/'))
+        depth = len(subdir.split("/"))
 
-    for event in sorted(data, key=operator.itemgetter('title')):
-        top, down, children = split_pathname(event['slug'], depth)
+    for event in sorted(data, key=operator.itemgetter("title")):
+        top, down, children = split_pathname(event["slug"], depth)
 
         if top != subdir or down in subdirs:
             continue
         if children:
-            addDirectoryItem(plugin.handle, plugin.url_for(show_dir,
-                             subdir=build_path(top, down)),
-                             ListItem(down.title()), True)
+            addDirectoryItem(
+                plugin.handle,
+                plugin.url_for(show_dir, subdir=build_path(top, down)),
+                ListItem(down.title()),
+                True,
+            )
             subdirs.add(down)
         else:
-            item = ListItem(event['title'])
-            item.setLabel2(event['acronym'])
-            item.setArt({'thumb': event['logo_url']})
+            item = ListItem(event["title"])
+            item.setLabel2(event["acronym"])
+            item.setArt({"thumb": event["logo_url"]})
 
             info = {
-                'plot': maybe_json(event, 'description', ''),
+                "plot": maybe_json(event, "description", ""),
             }
 
-            json_date_to_info(event, 'event_last_released_at', info)
+            json_date_to_info(event, "event_last_released_at", info)
 
-            item.setInfo('video', info)
+            item.setInfo("video", info)
 
-            url = plugin.url_for(show_conference, conf=event['url'].rsplit('/', 1)[1])
+            url = plugin.url_for(show_conference, conf=event["url"].rsplit("/", 1)[1])
             addDirectoryItem(plugin.handle, url, item, True)
 
     addSortMethod(plugin.handle, xbmcplugin.SORT_METHOD_DATE)
@@ -64,70 +73,69 @@ def show_dir(subdir=''):
     endOfDirectory(plugin.handle)
 
 
-@plugin.route('/conference/<conf>')
+@plugin.route("/conference/<conf>")
 def show_conference(conf):
     data = None
     relive = None
     try:
-        data = http.fetch_data('conferences/' + conf)
+        data = http.fetch_data("conferences/" + conf)
     except http.FetchError:
         return
 
     try:
         relive = http.fetch_relive_index().by_conference(conf)
     except http.FetchError:
-        pass # gui error shown by http class
+        pass  # gui error shown by http class
 
-    setContent(plugin.handle, 'movies')
+    setContent(plugin.handle, "movies")
 
-    aspect = calc_aspect(maybe_json(data, 'aspect_ratio', '16:9'))
+    aspect = calc_aspect(maybe_json(data, "aspect_ratio", "16:9"))
 
-    for event in sorted(data['events'], key=operator.itemgetter('title')):
+    for event in sorted(data["events"], key=operator.itemgetter("title")):
         # Add promoted indicator to title
-        title = event['title']
-        if maybe_json(event, 'promoted', False):
-            title = '★ ' + title
+        title = event["title"]
+        if maybe_json(event, "promoted", False):
+            title = "★ " + title
 
         item = ListItem(title)
         item.setArt(
             {
-                'thumb': event['thumb_url'],
-                'poster': maybe_json(event, 'poster_url', ''),
+                "thumb": event["thumb_url"],
+                "poster": maybe_json(event, "poster_url", ""),
             }
         )
-        item.setProperty('IsPlayable', 'true')
+        item.setProperty("IsPlayable", "true")
 
         info = {
-            'cast': maybe_json(event, 'persons', []),
-            'credits': ", ".join(maybe_json(event, 'persons', [])),
-            'genre': " / ".join(maybe_json(event, 'tags', [])),
-            'plot': maybe_json(event, 'description', ''),
-            'tagline': maybe_json(event, 'subtitle', ''),
-            'playcount': maybe_json(event, 'view_count', 0),
-            'duration': maybe_json(event, 'length', 0),
-            'dateadded': maybe_json(event, 'date', ''),
-            'mediatype': 'video',
+            "cast": maybe_json(event, "persons", []),
+            "credits": ", ".join(maybe_json(event, "persons", [])),
+            "genre": " / ".join(maybe_json(event, "tags", [])),
+            "plot": maybe_json(event, "description", ""),
+            "tagline": maybe_json(event, "subtitle", ""),
+            "playcount": maybe_json(event, "view_count", 0),
+            "duration": maybe_json(event, "length", 0),
+            "dateadded": maybe_json(event, "date", ""),
+            "mediatype": "video",
         }
-        json_date_to_info(event, 'date', info)
-        if maybe_json(event, 'release_date', ''):
-            json_date_to_info(event, 'release_date', info)
-            info['premiered'] = maybe_json(event, 'date', '')
-        item.setInfo('video', info)
+        json_date_to_info(event, "date", info)
+        if maybe_json(event, "release_date", ""):
+            json_date_to_info(event, "release_date", info)
+            info["premiered"] = maybe_json(event, "date", "")
+        item.setInfo("video", info)
 
         streamInfo = {}
-        length = maybe_json(event, 'length', 0)
+        length = maybe_json(event, "length", 0)
         if length > 0:
-            streamInfo['duration'] = length
+            streamInfo["duration"] = length
         if aspect:
-            streamInfo['aspect'] = aspect
-        item.addStreamInfo('video', streamInfo)
+            streamInfo["aspect"] = aspect
+        item.addStreamInfo("video", streamInfo)
 
-        url = plugin.url_for(resolve_event,
-                             event=event['url'].rsplit('/', 1)[1])
+        url = plugin.url_for(resolve_event, event=event["url"].rsplit("/", 1)[1])
         addDirectoryItem(plugin.handle, url, item, False)
 
     if relive is not None:
-        relive_item = ListItem('ReLive (unreleased)')
+        relive_item = ListItem("ReLive (unreleased)")
         url = plugin.url_for(show_relive, conf=conf)
         addDirectoryItem(plugin.handle, url, relive_item, True)
 
@@ -138,7 +146,7 @@ def show_conference(conf):
     endOfDirectory(plugin.handle)
 
 
-@plugin.route('/relive/<conf>')
+@plugin.route("/relive/<conf>")
 def show_relive(conf):
     data = None
     try:
@@ -147,30 +155,31 @@ def show_relive(conf):
     except http.FetchError:
         return
 
-    setContent(plugin.handle, 'movies')
+    setContent(plugin.handle, "movies")
 
     data = data.unreleased()
 
     for recording in data:
         item = ListItem(recording.title)
-        item.setArt({'thumb':  recording.get_thumb_url()})
-        item.setProperty('IsPlayable', 'true')
+        item.setArt({"thumb": recording.get_thumb_url()})
+        item.setProperty("IsPlayable", "true")
 
-        item.setInfo('video', {
-            'plot': recording.room,
-        })
+        item.setInfo(
+            "video",
+            {
+                "plot": recording.room,
+            },
+        )
 
-        item.addStreamInfo('video', {
-            'duration': recording.duration
-        })
+        item.addStreamInfo("video", {"duration": recording.duration})
 
         addDirectoryItem(plugin.handle, recording.get_video_url(), item, False)
 
     endOfDirectory(plugin.handle)
 
 
-@plugin.route('/event/<event>')
-@plugin.route('/event/<event>/<quality>/<format>')
+@plugin.route("/event/<event>")
+@plugin.route("/event/<event>/<quality>/<format>")
 def resolve_event(event, quality=None, format=None):
     if quality not in settings.QUALITY:
         quality = settings.get_quality(plugin)
@@ -189,7 +198,7 @@ def resolve_event(event, quality=None, format=None):
         setResolvedUrl(plugin.handle, True, ListItem(path=want[0].url, offscreen=True))
 
 
-@plugin.route('/live')
+@plugin.route("/live")
 def show_live():
     quality = settings.get_quality(plugin)
     format = settings.get_format(plugin)
@@ -202,7 +211,7 @@ def show_live():
         return
 
     if len(data.conferences) == 0:
-        entry = ListItem('No live event currently, go watch some recordings!')
+        entry = ListItem("No live event currently, go watch some recordings!")
         addDirectoryItem(plugin.handle, plugin.url_for(show_dir), entry, True)
 
     for conference in data.conferences:
@@ -216,23 +225,29 @@ def show_live():
             for id, stream in enumerate(want):
                 if id > 0 and not stream.translated:
                     break
-                extra = ''
+                extra = ""
                 if stream.translated:
-                    extra = ' (Translated %i)' % id if id > 1 else ' (Translated)'
-                talk_title = ' >> ' + room.current_talk_title if room.current_talk_title != '' else ''
-                item = ListItem(conference.name + ': ' + room.display + talk_title + extra)
-                item.setProperty('IsPlayable', 'true')
-                if stream.type == 'dash':
-                    item.setMimeType('application/dash+xml')
+                    extra = " (Translated %i)" % id if id > 1 else " (Translated)"
+                talk_title = (
+                    " >> " + room.current_talk_title
+                    if room.current_talk_title != ""
+                    else ""
+                )
+                item = ListItem(
+                    conference.name + ": " + room.display + talk_title + extra
+                )
+                item.setProperty("IsPlayable", "true")
+                if stream.type == "dash":
+                    item.setMimeType("application/dash+xml")
                     item.setContentLookup(False)
-                    item.setProperty('inputstream', 'inputstream.adaptive')
+                    item.setProperty("inputstream", "inputstream.adaptive")
                     if kodi.major_version() < 22:
-                        item.setProperty('inputstream.adaptive.manifest_type', 'mpd')
+                        item.setProperty("inputstream.adaptive.manifest_type", "mpd")
 
                 addDirectoryItem(plugin.handle, stream.url, item, False)
 
                 # MPEG-DASH includes all translated streams
-                if stream.type == 'dash':
+                if stream.type == "dash":
                     break
 
     endOfDirectory(plugin.handle)
@@ -240,12 +255,12 @@ def show_live():
 
 # FIXME: @plugin.cached()
 def get_index_data():
-    return http.fetch_data('conferences')['conferences']
+    return http.fetch_data("conferences")["conferences"]
 
 
 def split_pathname(name, depth):
-    path = name.split('/')
-    top = '/'.join(path[0:depth])
+    path = name.split("/")
+    top = "/".join(path[0:depth])
     if depth < len(path):
         down = path[depth]
     else:
@@ -255,11 +270,11 @@ def split_pathname(name, depth):
 
 
 def build_path(top, down):
-    if top == '':
+    if top == "":
         return down
     else:
-        return '/'.join((top, down))
+        return "/".join((top, down))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plugin.run(argv=sys.argv)
